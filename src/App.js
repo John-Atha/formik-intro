@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
-import { useFormik } from "formik";
+import TextInput from './TextInput';
+import { Formik, Form } from "formik";
 import * as Yup from 'yup';
 import Button from "@mui/material/Button";
 
@@ -24,110 +25,54 @@ const validationSchema = Yup.object({
                 .required('Confirmation is required')
 })
 
-
-
 function App() {
 
   const [submitted, setSubmitted] = useState(false);
+  const [usernameErrors, setUsernameErrors] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState(false);
+  const [confirmationErrors, setConfirmationErrors] = useState(false);
+  const [emailErrors, setEmailErrors] = useState(false);
 
-  const hasError = (field) => {
-    return formik.errors[field] && (formik.touched[field] || submitted) 
-  }
-
-  const formik = useFormik({
-    initialValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmation: "",
-    },
-    validationSchema,
-    onSubmit: (values) => alert(`${values.username} submitted`),
-  })
-  
   return (
     <div className="App">
       <h1>
         Formik example
       </h1>
 
-      <form onSubmit={(event) => {event.preventDefault(); formik.handleSubmit(event)}}>
+      <Formik
+        initialValues={{
+          username: "",
+          email: "",
+          password: "",
+          confirmation: "",
+        }}
+        validationSchema={validationSchema}
+        onSubmit={(values) => {
+          setSubmitted(true);
+          alert(`${values.username} submitted`);
+        }}
+      >
+        <Form>
           <h2>Sign up</h2>
-          <div className="input-container">
-            {hasError('username') &&
-              <label className="error">{formik.errors.username}</label>            
-            }
-            {!formik.errors.username && formik.values.username &&
-              <label className="simple-label">Username *</label>            
-            }
-            <input
-              name="username"
-              type="text"
-              placeholder="Your username..."
-              {...formik.getFieldProps('username')}
-              className={hasError('username') ? "with-error" : ""}
-            />
-          </div>
-          <br />
-          <div className="input-container">
-            {hasError('email') &&
-              <label className="error">{formik.errors.email}</label>
-            }
-            {!formik.errors.email && formik.values.email &&
-              <label className="simple-label">Email *</label>            
-            }
-            <input
-              name="email"
-              type="email"
-              placeholder="Your email..."
-              {...formik.getFieldProps('email')}
-              className={hasError('email') ? "with-error" : ""}
-            />
-          </div>
-          <br />
-          <div className="input-container">
-            {hasError('password') &&
-              <label className="error">{formik.errors.password}</label>
-            }
-            {!formik.errors.password && formik.values.password &&
-              <label className="simple-label">Password *</label>            
-            }
-            <input
-              name="password"
-              type="password"
-              placeholder="Your password..."
-              {...formik.getFieldProps('password')}
-              className={hasError('password') ? "with-error" : ""}
-            />
-          </div>
-          <br />
-          <div className="input-container">
-            {hasError('confirmation') &&
-              <label className="error">{formik.errors.confirmation}</label>
-            }
-            {!formik.errors.confirmation && formik.values.confirmation &&
-              <label className="simple-label">Password confirmation *</label>            
-            }
-            <input
-              name="confirmation"
-              type="password"
-              placeholder="Retype your password..."
-              {...formik.getFieldProps('confirmation')}
-              className={hasError('confirmation') ? "with-error" : ""}
-            />
-          </div>
-          <br />
+          
+          <TextInput name="username"     type="text"     placeholder="Your username..."     submitted={submitted} setErrors={setUsernameErrors} />
+          <TextInput name="email"        type="email"    placeholder="Your email..."        submitted={submitted} setErrors={setEmailErrors} />
+          <TextInput name="password"     type="password" placeholder="Your password..."     submitted={submitted} setErrors={setPasswordErrors} />
+          <TextInput name="confirmation" type="password" placeholder="Your confirmation..." submitted={submitted} setErrors={setConfirmationErrors} />
+
           <Button
             type="submit"
             variant="outlined"
-            onClick={() => {setSubmitted(true)} }
-            disabled={Object.keys(formik.errors).length!==0}>
-            Submit
+            disabled={usernameErrors || emailErrors || passwordErrors || confirmationErrors}>
+              Submit
           </Button>
-          <Button color="error" onClick={formik.handleReset}>
-            Clear
+          <Button
+            type="reset"
+            color="error">
+              Clear
           </Button>
-        </form>
+        </Form>
+      </Formik>
     </div>
   );
 }
