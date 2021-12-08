@@ -1,47 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { useFormik } from "formik";
+import * as Yup from 'yup';
 import Button from "@mui/material/Button";
 
-const validate = (values) => {
-  const email_regexp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-  const errors = {};
-  const { name, email, password, confirmation } = values; 
-  if (!name) {
-    errors.name = "Required";
-  }
-  if (!email) {
-    errors.email = "Required";
-  }
-  if (!password) {
-    errors.password = "Required";
-  }
-  if (!confirmation) {
-    errors.confirmation = "Required";
-  }
-  else if (password!==confirmation) {
-    errors.confirmation = "Password and confirmation do not match"
-  }
-  if (!email) {
-    errors.email = "Required";
-  }
-  else if (!email_regexp.test(values.email)) {
-    errors.email = "Invalid email address";
-  }
-  return errors;
-}
+const email_regexp = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+const validationSchema = Yup.object({
+  username: Yup.string()
+            .max(20, 'Must be at most 20 characters')
+            .required('Username is required'),
+  email:  Yup.string()
+          .matches(email_regexp, {
+            message: 'Invalid email address',
+            excludeEmptyStrings: true,
+          })
+          .required('Email is required'),
+  password: Yup.string()
+            .min(8, 'Must be at least 8 characters')
+            .required('Password is required'),
+  confirmation: Yup.string()
+                .oneOf([Yup.ref('password'), ''], 'Password and Confirmation do not match')
+                .required('Confirmation is required')
+})
+
+
 
 function App() {
 
+  const [submitted, setSubmitted] = useState(false);
+
+  const hasError = (field) => {
+    return formik.errors[field] && (formik.touched[field] || submitted) 
+  }
+
   const formik = useFormik({
     initialValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
       confirmation: "",
     },
-    validate,
-    onSubmit: (values) => alert(`${values.name} submitted`),
+    validationSchema,
+    onSubmit: (values) => alert(`${values.username} submitted`),
   })
   
   return (
@@ -53,24 +54,23 @@ function App() {
       <form onSubmit={(event) => {event.preventDefault(); formik.handleSubmit(event)}}>
           <h2>Sign up</h2>
           <div className="input-container">
-            {formik.errors.name &&
-              <label className="error">{formik.errors.name}</label>            
+            {hasError('username') &&
+              <label className="error">{formik.errors.username}</label>            
             }
-            {!formik.errors.name && formik.values.name &&
-              <label className="simple-label">Name *</label>            
+            {!formik.errors.username && formik.values.username &&
+              <label className="simple-label">Username *</label>            
             }
             <input
-              name="name"
+              name="username"
               type="text"
-              placeholder="Your name..."
-              value={formik.values.name}
-              onChange={formik.handleChange}
-              className={formik.errors.name ? "with-error" : ""}
+              placeholder="Your username..."
+              {...formik.getFieldProps('username')}
+              className={hasError('username') ? "with-error" : ""}
             />
           </div>
           <br />
           <div className="input-container">
-            {formik.errors.email &&
+            {hasError('email') &&
               <label className="error">{formik.errors.email}</label>
             }
             {!formik.errors.email && formik.values.email &&
@@ -80,14 +80,13 @@ function App() {
               name="email"
               type="email"
               placeholder="Your email..."
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              className={formik.errors.email ? "with-error" : ""}
+              {...formik.getFieldProps('email')}
+              className={hasError('email') ? "with-error" : ""}
             />
           </div>
           <br />
           <div className="input-container">
-            {formik.errors.password &&
+            {hasError('password') &&
               <label className="error">{formik.errors.password}</label>
             }
             {!formik.errors.password && formik.values.password &&
@@ -97,14 +96,13 @@ function App() {
               name="password"
               type="password"
               placeholder="Your password..."
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              className={formik.errors.password ? "with-error" : ""}
+              {...formik.getFieldProps('password')}
+              className={hasError('password') ? "with-error" : ""}
             />
           </div>
           <br />
           <div className="input-container">
-            {formik.errors.confirmation &&
+            {hasError('confirmation') &&
               <label className="error">{formik.errors.confirmation}</label>
             }
             {!formik.errors.confirmation && formik.values.confirmation &&
@@ -114,13 +112,16 @@ function App() {
               name="confirmation"
               type="password"
               placeholder="Retype your password..."
-              value={formik.values.confirmation}
-              onChange={formik.handleChange}
-              className={formik.errors.confirmation ? "with-error" : ""}
+              {...formik.getFieldProps('confirmation')}
+              className={hasError('confirmation') ? "with-error" : ""}
             />
           </div>
           <br />
-          <Button type="submit" variant="outlined">
+          <Button
+            type="submit"
+            variant="outlined"
+            onClick={() => {setSubmitted(true)} }
+            disabled={Object.keys(formik.errors).length!==0}>
             Submit
           </Button>
           <Button color="error" onClick={formik.handleReset}>
