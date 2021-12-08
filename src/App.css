@@ -1,3 +1,15 @@
+@keyframes shaking {
+  0% {
+    margin-left: -15px;
+  }
+  50% {
+    margin-left: 15px;
+  }
+  100% {
+    margin-left: 0px;
+  }
+}
+
 .App {
   text-align: center;
 }
@@ -35,4 +47,64 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+form {
+  padding: 10px;
+  margin: 10vh auto;
+}
+
+input {
+  border: none;
+  border-bottom: 1px solid grey;
+  padding: 7px;
+  padding-left: 0px;
+  margin-bottom: 5px;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+input:focus {
+  outline: none;
+  border: none;
+  border-bottom: 1px solid blue;
+}
+
+input:hover {
+  border-color: rgb(197, 221, 230);
+}
+
+h2 {
+  font-style: italic;
+  color: black;
+}
+
+.with-error {
+  border: none;
+  border-bottom: 1px solid red !important;
+  animation-name: shaking;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 2;
+  animation-duration: 0.2s;
+}
+
+.error {
+  color: red;
+  font-style: italic;
+  
+}
+
+.simple-label {
+  color: rgb(150, 150, 190);
+  font-style: italic;
+}
+
+.input-container {
+  width: min-content;
+  margin: auto;
+  text-align: left;
+}
+
+button {
+  margin: 10px !important;
 }
